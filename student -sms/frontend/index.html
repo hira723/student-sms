@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Management System</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f2f2f2; }
+    h1 { color: #333; }
+    form { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    input, button { padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 5px; }
+    button { background: #28a745; color: white; cursor: pointer; }
+    table { width: 100%; background: white; border-collapse: collapse; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: center; }
+    .delete { background: red; }
+  </style>
+</head>
+<body>
+  <h1>Student Management System</h1>
+
+  <form id="studentForm">
+    <input type="text" id="name" placeholder="Student Name" required>
+    <input type="text" id="roll" placeholder="Roll No" required>
+    <input type="text" id="course" placeholder="Course" required>
+    <button type="submit">Add Student</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Roll</th><th>Course</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="studentTable"></tbody>
+  </table>
+
+<script>
+const api = 'http://localhost:3000/students';
+
+// Load students
+function loadStudents() {
+  fetch(api)
+  .then(res => res.json())
+  .then(data => {
+    let rows = '';
+    data.forEach(s => {
+      rows += `<tr>
+        <td>${s.id}</td>
+        <td>${s.name}</td>
+        <td>${s.roll}</td>
+        <td>${s.course}</td>
+        <td><button class="delete" onclick="deleteStudent(${s.id})">Delete</button></td>
+      </tr>`;
+    });
+    document.getElementById('studentTable').innerHTML = rows;
+  });
+}
+
+// Add student
+document.getElementById('studentForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const student = {
+    name: document.getElementById('name').value,
+    roll: document.getElementById('roll').value,
+    course: document.getElementById('course').value
+  };
+  fetch(api, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(student)
+  }).then(() => {
+    loadStudents();
+    document.getElementById('studentForm').reset();
+  });
+});
+
+// Delete student
+function deleteStudent(id) {
+  fetch(`${api}/${id}`, { method: 'DELETE' })
+  .then(() => loadStudents());
+}
+
+loadStudents(); // page load par data le aao
+</script>
+</body>
+</html>
